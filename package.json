@@ -12,6 +12,8 @@
     "react-native": "0.41.2",
     "react-native-animated-linear-gradient": "^1.0.1",
     "react-native-linear-gradient": "^2.0.0",
+    "react-native-shadow": "^1.1.0",
+    "react-native-sound": "^0.9.0",
     "styled-components": "^1.4.3"
   },
   "devDependencies": {

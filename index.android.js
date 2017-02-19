@@ -24,15 +24,23 @@ export default class reactNativeLOL extends Component {
           Welcome to React Native LOL!
         </Text>
         <View style={{ margin: 10 }} >
-          <Button primary>
+          <Button primary animate active>
             GET START
           </Button>
         </View>
+
         <View style={{ margin: 10 }} >
-          <Button>
+          <Button primary animate>
             DOCUMENTATION
           </Button>
         </View>
+
+        <View style={{ margin: 10 }} >
+          <Button >
+            GITHUB
+          </Button>
+        </View>
+        
       </View>
     );
   }

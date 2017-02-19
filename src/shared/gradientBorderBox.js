@@ -4,18 +4,19 @@ import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Chroma from 'chroma-js';
 
-const TOP_COLORS = ['#EF2A2A', '#EF6A2A']
-const BOTTOM_COLORS = ['#EF6A2A', '#EFD82A']
 const GRADIENT_COLOR_LENGTH = 25
-const INTERVAL = 50
+const INTERVAL = 35
 
 class GradientBorderBox extends React.Component {
  constructor(props){
     super(props)
-    const { border_active_start, border_active_end } = this.props.theme
-    this.TOP_COLORS_SPECTRUM = Chroma.scale([border_active_start, border_active_end, border_active_start]).colors(GRADIENT_COLOR_LENGTH)
-    this.BOTTOM_COLORS_SPECTRUM = Chroma.scale([border_active_end, border_active_start, border_active_end]).colors(GRADIENT_COLOR_LENGTH)
-    console.log(this.TOP_COLORS_SPECTRUM,this.BOTTOM_COLORS_SPECTRUM )
+    const { border_start, border_end, border_active_start, border_active_end } = this.props.theme
+    this.TOP_COLORS_SPECTRUM_ACTIVE = Chroma.scale([border_active_start, border_active_end, border_active_start]).colors(GRADIENT_COLOR_LENGTH)
+    this.BOTTOM_COLORS_SPECTRUM_ACTIVE = Chroma.scale([border_active_end, border_active_start, border_active_end]).colors(GRADIENT_COLOR_LENGTH)
+    
+    this.TOP_COLORS_SPECTRUM = Chroma.scale([border_start, border_end, border_start]).colors(GRADIENT_COLOR_LENGTH)
+    this.BOTTOM_COLORS_SPECTRUM = Chroma.scale([border_end, border_start, border_end]).colors(GRADIENT_COLOR_LENGTH)
+
     this.state = {
       topIndex: 0,
       bottomIndex: 0,
@@ -26,6 +27,7 @@ class GradientBorderBox extends React.Component {
 
   componentDidMount () {
     this.timer = setInterval(() => {
+      if(!this.props.animate || !this.props.active) return;
       let { topIndex, bottomIndex } = this.state
 
       topIndex++
@@ -41,8 +43,8 @@ class GradientBorderBox extends React.Component {
       this.setState({
         topIndex: topIndex,
         bottomIndex: bottomIndex,
-        colorTop: this.TOP_COLORS_SPECTRUM[topIndex],
-        colorBottom: this.BOTTOM_COLORS_SPECTRUM[bottomIndex]
+        colorTop: this.props.active ?  this.TOP_COLORS_SPECTRUM_ACTIVE[topIndex] : this.TOP_COLORS_SPECTRUM[topIndex],
+        colorBottom: this.props.active ? this.BOTTOM_COLORS_SPECTRUM_ACTIVE[bottomIndex] : this.BOTTOM_COLORS_SPECTRUM[bottomIndex]
       })
     }, INTERVAL)
   }
@@ -51,14 +53,30 @@ class GradientBorderBox extends React.Component {
     clearTimeout(this.timer);
   }
 
+  componentWillReceiveProps(nextProps){
+    if(!nextProps.active && this.props.active) {
+      this.setState({
+        colorTop: this.TOP_COLORS_SPECTRUM[this.state.topIndex],
+        colorBottom: this.BOTTOM_COLORS_SPECTRUM[this.state.bottomIndex]
+      })
+    }
+
+    if(!this.props.active && nextProps.active) {
+      this.setState({
+        colorTop: this.TOP_COLORS_SPECTRUM_ACTIVE[this.state.topIndex],
+        colorBottom: this.BOTTOM_COLORS_SPECTRUM_ACTIVE[this.state.bottomIndex]
+      })
+    }
+  }
+
   render() {
-    const { children, primary,  theme, style, ...others } = this.props
+    const { children, primary, active, theme, style, animate, ...others } = this.props
     //colors={}[theme.border_active_start, theme.border_active_end]
     return (
       <LinearGradient 
         colors={[this.state.colorTop, this.state.colorBottom]} 
         style={style}
-        start={{x: 0.0, y: 0.25}} end={{x: 0.5, y: 1.0}}>
+        start={ animate || active ? {x: 0.5, y: 0.25} : {x: 0.5, y: 0.0} } end={ animate || active ? {x: 0.5, y: 1.0} : {x: 0.5, y: 1.0} }>
         { children }
       </LinearGradient>
     );
@@ -66,6 +84,8 @@ class GradientBorderBox extends React.Component {
 }
 
 GradientBorderBox.defaultProps = {
+  active: false,
+  animate: false,
   theme: {
     border_active_start: '#4c669f',
     border_active_end: '#3b5998'
